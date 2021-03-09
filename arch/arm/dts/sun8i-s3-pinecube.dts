@@ -87,3 +87,69 @@
 &emac {
 	status = "okay";
 };
+
+&csi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&csi1_8bit_pins>;
+	status = "okay";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		csi1_ep: endpoint {
+			remote-endpoint = <&ov5640_ep>;
+			bus-width = <8>;
+			hsync-active = <1>; /* Active high */
+			vsync-active = <0>; /* Active low */
+			data-active = <1>;  /* Active high */
+			pclk-sample = <1>;  /* Rising */
+		};
+	};
+};
+
+&i2c1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c1_pe_pins>;
+	status = "okay";
+
+	ov5640: camera@3c {
+		compatible = "ovti,ov5640";
+		reg = <0x3c>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&csi1_mclk_pin>;
+		clocks = <&ccu CLK_CSI1_MCLK>;
+		clock-names = "xclk";
+
+		AVDD-supply = <&reg_ldo3>;
+		DOVDD-supply = <&reg_ldo3>;
+		DVDD-supply = <&reg_ldo4>;
+		reset-gpios = <&pio 4 23 GPIO_ACTIVE_LOW>; /* PE23 */
+		powerdown-gpios = <&pio 4 24 GPIO_ACTIVE_HIGH>; /* PE24 */
+
+		port {
+			ov5640_ep: endpoint {
+				remote-endpoint = <&csi1_ep>;
+				bus-width = <8>;
+				hsync-active = <1>; /* Active high */
+				vsync-active = <0>; /* Active low */
+				data-active = <1>;  /* Active high */
+				pclk-sample = <1>;  /* Rising */
+			};
+		};
+	};
+};
+
+&reg_ldo3 {
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+	regulator-name = "avdd-dovdd-2v8-csi";
+	regulator-soft-start;
+	regulator-ramp-delay = <1600>;
+};
+
+&reg_ldo4 {
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+	regulator-name = "dvdd-1v8-csi";
+};
