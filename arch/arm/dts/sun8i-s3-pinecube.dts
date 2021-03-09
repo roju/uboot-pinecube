@@ -108,6 +108,20 @@
 	};
 };
 
+&i2c0 {
+	status = "okay";
+
+	axp209: pmic@34 {
+		compatible = "x-powers,axp203",
+			     "x-powers,axp209";
+		reg = <0x34>;
+		interrupt-parent = <&gic>;
+		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+	};
+};
+
 &i2c1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c1_pe_pins>;
@@ -139,6 +153,8 @@
 		};
 	};
 };
+
+#include "axp209.dtsi"
 
 &reg_ldo3 {
 	regulator-min-microvolt = <2800000>;
